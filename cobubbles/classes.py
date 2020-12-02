@@ -21,12 +21,14 @@ from . import __version__
 
 def _format_slice(slice_iter):
     """
+    Convenient function to format `slice_iter` as a proper `slice` object.
+
     Parameters
     ----------
     slice_iter : None, int, tuple of 3 int or slice, optional
         Slicing to perform accross iterations, to decimate data.
         If None (default), no decimation.
-        If int, step decimation.
+        If int, decimation by step, starting after step (most common behavior)
         If 3-tuple, arguments are passed on to a slice object.
         If slice, this slice object is used to decimate.
     
@@ -38,7 +40,7 @@ def _format_slice(slice_iter):
     if slice_iter is None:
         idx = slice(None)
     elif isinstance(slice_iter, int):
-        idx = slice(None, None, slice_iter)
+        idx = slice(slice_iter, None, slice_iter)
     elif isinstance(slice_iter, tuple) and (len(slice_inter) == 3):
         idx = slice(*slice_iter)
     elif isinstance(slice_iter, slice):
@@ -50,6 +52,20 @@ def _format_slice(slice_iter):
 
 
 class Bubble:
+    """
+    A bubble in the simulation.
+
+    Attributes 
+    ----------
+    Attributes are flexible, and depend on each simulation requirements.
+    They are defined at instantiation as keyword arguments.
+
+    Methods
+    -------
+    to_dict : return attributes as a dictionary.
+
+    to_series : return attributes as a pandas.Series.
+    """
     def __init__(self, **kwargs):
         """
         kwargs : keyword arguments, passed on as class attributes.
@@ -85,7 +101,7 @@ class BaseSimu:
         modifying it.
 
     `bubbles` : list
-        List of bubbles dumped at every iteration. See also `_format_bubbles`.
+        List of bubbles dumped after every iteration. See also `_format_bubbles`.
 
     `params` : dict
         Simulation parameters. See also `params_df`.
@@ -95,6 +111,16 @@ class BaseSimu:
  
     Numerical Methods
     -----------------
+    `step_advance(bubbles)`
+        Step advance, defined as the sequence of the 4 methods (create, pop,
+        move, merge), in this order. When bubbles have a lifetime, it is 
+        incremented by 1 after those.
+
+    `run(n_steps)`
+        Advance simulation by `n_steps`.
+
+    The following methods are sub-class dependent, and have to be (re)-defined
+    and overridden.
     `_create_bubbles(bubbles)`
         Create/introduce bubbles.
 
@@ -107,15 +133,8 @@ class BaseSimu:
     `_merge_bubbles(bubbles)` 
         Merge/coalesce bubbles.
 
-    `step_advance(bubbles)`
-        Step advance, defined as the sequence of the former 4 methods, in this
-        order. When bubbles have a lifetime, it is incremented by 1 after.
-
     `_format_bubbles(bubbles)` 
         Format bubbles, before appending to `bubbles`.
-
-    `run(n_steps)`
-        Advance simulations by `n_steps`.
 
     Other Methods
     -------------
@@ -123,7 +142,7 @@ class BaseSimu:
         Plot bubbles number vs iteration.
 
     `_count_bubbles(bubbles)`
-        Count bubbles (may require more elaborate than `len(bubbles)`)
+        Count bubbles (may require more elaborate procedure than `len(bubbles)`)
 
     `to_hdf(filename)`
         Export bubbles as HDF5 file (using pandas).
@@ -203,7 +222,6 @@ class BaseSimu:
         bubbles = self._create_bubbles(bubbles)
         # burst bubbles
         bubbles = self._pop_bubbles(bubbles)
-        # scheme: spatial repartition is random and uniform at every step
         #TODO: bubbles move a little around their location (needs dynamics)
         bubbles = self._move_bubbles(bubbles)
         bubbles = self._merge_bubbles(bubbles)
@@ -243,6 +261,26 @@ class BaseSimu:
         ax.set_ylim(bottom=0)
         return ax
 
+    def to_hdf(self, fname, **kwargs):
+        """
+        Save data to .h5 file.
+
+        Parameters
+        ----------
+        fname : str
+            File name.
+        
+        **kwargs : keywords arguments passed on to `df.to_hdf`. Default values
+            are `key='df', mode='a'`.
+        """
+        df = pd.concat({i: pd.DataFrame(d)\
+                for i, d in enumerate(self.bubbles)}, \
+                names=['iter', 'bubbles'])
+        if 'key' not in kwargs.keys():
+            kwargs['key'] = 'df'
+        df.to_hdf(fname, **kwargs)
+        return None
+
     def _count_bubbles(self, bubbles):
         """
         Count bubbles.
@@ -264,26 +302,6 @@ class BaseSimu:
         """
         return len(bubbles)
     
-    def to_hdf(self, fname, **kwargs):
-        """
-        Save data to .h5 file.
-
-        Parameters
-        ----------
-        fname : str
-            File name.
-        
-        **kwargs : keywords arguments passed on to `df.to_hdf`. Default values
-            are `key='df', mode='a'`.
-        """
-        df = pd.concat({i: pd.DataFrame(d)\
-                for i, d in enumerate(self.bubbles)}, \
-                names=['iter', 'bubbles'])
-        if 'key' not in kwargs.keys():
-            kwargs['key'] = 'df'
-        df.to_hdf(fname, **kwargs)
-        return None
-
     def _create_bubbles(self, bubbles):
         """
         Create bubbles method.
