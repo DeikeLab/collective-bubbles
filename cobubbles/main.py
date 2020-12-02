@@ -13,9 +13,7 @@ from scipy import stats
 import importlib as imp
 from os.path import split, join, splitext
 
-from .. import markov_bubble
-imp.reload(markov_bubble)
-from . import DATA, DIRS, classes
+from . import classes
 imp.reload(classes)
 from .classes import SimuVolumesInt, Bubble, SimuDiametersHist
 from .methods_merge import merge_bubbles_closest
@@ -29,6 +27,7 @@ PARAMS_DEFAULT = {
         'rate_prod_std': 4,
         'meniscus': 1,  #meniscii interaction length
         'merging_probability': 1, #Merging probability, for 2 eligible bubbles
+        'mean_lifetime': 1,
         }
 
 BUBBLE_INIT = {

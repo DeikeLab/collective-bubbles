@@ -16,17 +16,7 @@ import scipy.optimize as opt
 from itertools import chain
 from os.path import abspath, isfile
 
-def _create_axis(ax=None):
-    """
-    Create axis or retrieve axis instance.
-    """
-    if ax is None:
-        fig, ax = plt.subplots()
-    elif isinstance(ax, plt.Axes):
-        fig = ax.get_figure()
-    elif isinstance(ax, bool) and ax == False:
-        fig, ax = None, None
-    return fig, ax
+from . import __version__
 
 def _format_slice(slice_iter):
     """
@@ -74,34 +64,68 @@ class Bubble:
         return self.__dict__
 
     def to_series(self):
+        """
+        Return bubble info as a pd.Series.
+        """
         return pd.Series(self.__dict__)
 
 
 class BaseSimu:
     """
-    Meta-class for bubbles bursting+coalescing simulations.
+    Meta-class for collective surface bubbles simulations.
 
-    Children must define the following...
+    Children must define the following methods and attributes.
     Attributes
     ----------
-    `_bubbles`: list
+    `_bubbles` : list
         List of **current** bubbles, carried on all along the simulation. Can 
         contain as little information as the bubbles radii or volumes, or their
         location, etc. The dimensionality must match that of the methods 
         modifying it.
 
-    `bubbles`: list
-        List of lists of bubbles at every iteration.
-    
-    Methods
-    -------
-    `_create_bubbles(d)`
+    `bubbles` : list
+        List of bubbles exported at every iteration. See also `_format_bubbles`.
 
-    `_pop_bubbles(d)`
+    `params` : dict
+        Simulation parameters. See also `params_df`.
 
-    `_move_bubbles(d)`
+    `_bubble_init` : dict
+        Bubble initialization properties.
+ 
+    Numerical Methods
+    -----------------
+    `_create_bubbles(bubbles)`
+        Create/introduce bubbles.
 
-    `_merge_bubbles(d, locs)`
+    `_pop_bubbles(bubbles)` 
+        Pop/burst bubbles.
+
+    `_move_bubbles(bubbles)` 
+        Move/displace bubbles.
+
+    `_merge_bubbles(bubbles)` 
+        Merge/coalesce bubbles.
+
+    `step_advance(bubbles)`
+        Step advance, defined as the sequence of the former 4 methods, in this
+        order. When bubbles have a lifetime, it is incremented by 1 after.
+
+    `_format_bubbles(bubbles)` 
+        Format bubbles, before appending to `bubbles`.
+
+    `run(n_steps)`
+        Advance simulations by `n_steps`.
+
+    Other Methods
+    -------------
+    `plot_bubbles_number()`
+        Plot bubbles number vs iteration.
+
+    `_count_bubbles(bubbles)`
+        Count bubbles (may require more elaborate than `len(bubbles)`)
+
+    `to_hdf(filename)`
+        Export bubbles as HDF5 file (using pandas).
     """
     def __init__(self, **kw_params):
         """
@@ -117,6 +141,8 @@ class BaseSimu:
         from .main import PARAMS_DEFAULT, BUBBLE_INIT
         self._bubble_init = BUBBLE_INIT
         self.params = PARAMS_DEFAULT.copy()
+        self.params['version'] = __version__
+        self.params['class'] = self.__class__
         for k, v in kw_params.items():
             self.params[k] = v
 
@@ -133,6 +159,7 @@ class BaseSimu:
 
     @property
     def params_df(self):
+        """Simulation parameters as a pandas.Series"""
         return pd.Series(self.params)
 
     def __len__(self):
@@ -140,23 +167,25 @@ class BaseSimu:
 
     def step_advance(self, bubbles):
         """
+        Advance simulation by 1 iteration.
+
         Parameters
         ----------
-        d : list
+        bubbles : list
             Current list of bubbles.
 
         Returns
         -------
-        d : list
+        bubbles : list
             Updated list of bubbles.
 
         Notes
         -----
         Apply methods in the following order:
-        - `_new_bubbles(d)`
-        - `_pop_bubbles(d)`
-        - `_move_bubbles(d)`
-        - `_merge_bubbles(d, locs)`
+        1. `_new_bubbles(bubbles)`
+        2. `_pop_bubbles(bubbles)`
+        3. `_move_bubbles(bubbles)`
+        4. `_merge_bubbles(bubbles)`
         """
         # produce new bubbles
         bubbles = self._create_bubbles(bubbles)
@@ -203,6 +232,24 @@ class BaseSimu:
         return ax
 
     def _count_bubbles(self, bubbles):
+        """
+        Count bubbles.
+
+        Parameters
+        ----------
+        bubbles : list
+            List of bubbles.
+
+        Returns
+        -------
+        N : int
+            Bubbles count.
+
+        Notes
+        -----
+        Used in `plot_bubbles_number`, and should be overridden to match the 
+        way bubbles are saved in `self.bubbles`.
+        """
         return len(bubbles)
     
     def to_hdf(self, fname, **kwargs):

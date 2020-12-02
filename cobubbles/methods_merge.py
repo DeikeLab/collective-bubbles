@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import distance
 
-from .classes import Bubble, _create_axis
+from .classes import Bubble
 
 def merge_bubbles_pair(bubble1, bubble2):
     """
@@ -74,6 +74,9 @@ def merge_bubbles_closest(bubbles, max_dist,
         Individual merging probability: 0 for no coalescence, 1 for systematic
         merging.
 
+    show : bool or plt.Axes, optional
+        Visualize merging step in plot (default False).
+
     Returns
     -------
     sizes : list
@@ -115,9 +118,12 @@ def merge_bubbles_closest(bubbles, max_dist,
         b = merge_bubbles_pair(b1, b2)
         bubbles.append(b)
         merged.extend([i, j])
-    # display results
+    # visualize results
     if show != False:
-        fig, ax = _create_axis(show)
+        if isinstance(show, plt.Axes):
+            ax = show
+        else:
+            fig, ax = plt.subplots()
         for b in bubbles_old:
             cir = plt.Circle(b.xy, b.diameter/2, fc='k', alpha=.4)
             ax.add_patch(cir)
