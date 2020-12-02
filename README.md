@@ -52,8 +52,9 @@ Then run the simulation for 100 steps and display a ``time'' series of bubbles n
 s.run(100)
 s.plot_time_series()
 ```
-![Series](examples/time_series1.png)
 
+### See also
+[An example in a notebook.](examples/minimal_example-SimuB.ipynb)
 
 ## Installation
-As a regular (developer) Python package: clone package locally then `pip install .`.  Or `pip install -e .` if one plans to edit their own classes.
+As a regular Python package: clone package locally or download a zipped released version then `pip install .`.  Or `pip install -e .` if one plans to edit their own classes.
