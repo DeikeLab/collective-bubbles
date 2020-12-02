@@ -15,6 +15,7 @@ from statsmodels.tsa.stattools import acf
 import scipy.optimize as opt
 from itertools import chain
 from os.path import abspath, isfile
+from datetime import datetime
 
 from . import __version__
 
@@ -141,8 +142,9 @@ class BaseSimu:
         from .main import _params_default, _bubble_init
         # module default values
         self.params = _params_default.copy()
-        self.params['version'] = __version__
+        self.params['code_version'] = __version__
         self.params['class_name'] = '.'.join((self.__module__, self.__name__))
+        self.params['timestamp'] = datetime.now()
         # class default values
         if hasattr(self, '_params_default'):
             for k, v in self._params_default.items():

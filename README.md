@@ -38,16 +38,16 @@ There is currently no way to modify it when instantiating the class, but it can 
 However, the first bubbles of the simulation can be given as a list when instantiating the class: `s = main.Simu(bubbles=[list of bubbles])`.
 
 ## Minimal working example
-The parameters of the simulation are given as a dictionary/keywords arguments `params_simu`.
+The parameters of the simulation are given as a dictionary/keywords arguments `params`.
 Depending on the class definition, some parameters may already be defined and assigned default values (e.g. domain size).
 Provided the class `Simu` is defined:
 ```
 from cobubbles.main import Simu
-params_simu = dict(lifetime=10)
-s = Simu(**params_simu)
+params = dict(lifetime=10)
+s = Simu(**params)
 s.params #or s.params_df for a view as a pd.Series
 ```
-Then run the simulation for 100 steps and display a *time* series of bubbles number and mean size (figure output may be different):
+Then run the simulation for 100 steps and display a ``time'' series of bubbles number and mean size (figure output may be different):
 ```
 s.run(100)
 s.plot_time_series()
