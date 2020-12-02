@@ -84,7 +84,7 @@ class BaseSimu:
         modifying it.
 
     `bubbles` : list
-        List of bubbles exported at every iteration. See also `_format_bubbles`.
+        List of bubbles dumped at every iteration. See also `_format_bubbles`.
 
     `params` : dict
         Simulation parameters. See also `params_df`.
@@ -137,21 +137,31 @@ class BaseSimu:
         **kw_params : keyword arguments
             Additional parameters.
         """
-        # init parameters
-        from .main import PARAMS_DEFAULT, BUBBLE_INIT
-        self._bubble_init = BUBBLE_INIT
-        self.params = PARAMS_DEFAULT.copy()
+        # initialize parameters
+        from .main import _params_default, _bubble_init
+        # module default values
+        self.params = _params_default.copy()
         self.params['version'] = __version__
-        self.params['class'] = self.__class__
+        self.params['class_name'] = '.'.join((self.__module__, self.__name__))
+        # class default values
+        if hasattr(self, '_params_default'):
+            for k, v in self._params_default.items():
+                self.params[k] = v
+        # keyword arguments values
         for k, v in kw_params.items():
             self.params[k] = v
 
         # init bubbles
+        _init = _bubble_init.copy()
+        if hasattr(self, '_bubble_init'):
+            for k, v in self._bubble_init.items():
+                _init[k] = v
+        self._bubble_init = _init
         if 'bubbles' in kw_params:
             bubbles = kw_params['bubbles']
             del self.params['bubbles']
         else:
-            bubbles = [Bubble(**BUBBLE_INIT)\
+            bubbles = [Bubble(**_init)\
                 for i in range(self.params['n_bubbles'])]
         self._bubbles = bubbles
         self.bubbles = [self._format_bubbles(bubbles)]
@@ -336,9 +346,9 @@ class BaseSimu:
         """
         return bubbles
 
-    def _format_bubbles(self, bubbles):
+    def _dump_bubbles(self, bubbles):
         """
-        **Copy** and format bubbles before exporting/saving in `bubbles`.
+        **Copy** & format bubbles before dumping/exporting/saving in `bubbles`.
 
         Parameters
         ----------
