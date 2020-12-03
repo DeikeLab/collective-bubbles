@@ -161,3 +161,54 @@ class SimuB(SimuVolumesInt):
         return bubbles
 
 
+class SimuC(SimuVolumesInt):
+    """
+    Creation: `rate_prod` bubbles per iteration.
+
+    Bursting: remove bubbles older than `lifetime`.
+    """
+    __name__ = 'SimuC'
+    _params_default = {
+            'lifetime': 1,
+            'merging_probability': 1,
+            }
+
+    _bubble_init = {
+            'lifetime': 0,
+            }
+
+    def _create_bubbles(self, bubbles):
+        """
+        Append `n` bubbles of unit size, where `n` is normally distributed.
+        """
+        q_prod = [self.params['rate_prod_'+s] for s in ['avg', 'std']]
+        n_new = abs(int(round(stats.norm.rvs(*q_prod))))
+        bubbles += [Bubble(**self._bubble_init) for i in range(n_new)]
+        return bubbles
+
+    def _pop_bubbles(self, bubbles):
+        """
+        Pop `n` bubbles, randomly (uniform distribution) chosen in the bubbles
+        list. `n` is normally distributed.
+        Notes
+        -----
+        Currently implemented: only uniform popping for every sizes.
+        """
+        pop, = np.where(
+                np.r_[[b.lifetime for b in bubbles]] > self.params['lifetime'])
+        for k in sorted(pop, reverse=True):
+            bubbles.pop(k)
+        return bubbles
+
+    def _move_bubbles(self, bubbles):
+        for b in bubbles:
+            b.xy = np.random.rand(2)*self.params['width']
+        return bubbles
+
+    def _merge_bubbles(self, bubbles):
+        p = self.params
+        if len(bubbles) >= 2:
+        # scheme: closest merge first
+            bubbles = merge_bubbles_closest(bubbles, p['meniscus'],
+                    proba=p['merging_probability'])
+        return bubbles
