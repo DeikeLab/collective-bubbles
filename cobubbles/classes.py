@@ -427,6 +427,10 @@ class SimuVolumesInt(BaseSimu):
             if isfile(fname):
                 self.params = pd.read_hdf(fname, key='params', mode='r')
                 df = pd.read_hdf(fname, key='count', mode='r')
+                if df.dtype == 'uint8':
+                    # TODO: maybe harmonize everything in UINT64?
+                    df = df.astype('int64')
+
 
             if mode is None or mode == 'analysis':
                 self.bubbles = df
@@ -508,13 +512,24 @@ class SimuVolumesInt(BaseSimu):
 
     def to_hdf(self, fname, **kwargs):
         """
-        Save bubble volume distribution/count as HDF5 file.
+        Save bubble volume distribution/count (per iteration) as HDF5 file.
         
         Notes
         -----
-        By default, file is overridden and key `count` is used.
+        - By default, file is overridden, unless stated in `kwargs`.
+        - HDF5 file contains 2 keys: 
+          - `count` for histograms,
+          - `params` for simulation parameters
+        - When bubbles count is less than or equal to 255 (per iter), data is
+        saved as UINT8.
+
+        See also
+        --------
+        __init__ : `filename` keyword argument to retrieve stored data.
         """
         df = self.bubbles_df.copy()
+        if df.max() <= 255:
+            df = df.astype('uint8')
         if 'mode' not in kwargs.keys():
             kwargs['mode'] = 'w'
         if 'key' not in kwargs.keys():
