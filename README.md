@@ -1,6 +1,10 @@
 # Collective Bubbles Statistics
 Framework to simulate surface bubbles, and study their statistics as a function of a reduced number of parameters (production rate, mean lifetime, merging efficiency, etc).
 
+## Note before you start
+The code is intended to be very modular, to try different parameterizations, models, equations.
+Just write your own bubbles merging/popping/creation function(s), and plug it in this general framework.
+
 ## Code organization
 ### Simulation
 Base classes and advancing scheme are coded in [`classes`](cobubbles/classes.py).
@@ -11,7 +15,7 @@ On every iteration, the simulation class `BaseSimu` calls successively the 4 fol
 4. `_merge_bubbles`,
 
 defined as methods of the simulation inherited class, and customizable as desired.
-Pre-existing functions can be picked from the corresponding modules.
+Pre-existing functions can be picked from the corresponding modules ([`create`](cobubbles/methods_create.py), [`pop`](cobubbles/methods_pop.py), [`move`](cobubbles/methods_move.py), [`merge`](cobubbles/methods_merge.py)).
 
 So far, bubbles in the simulation can be handled/dumped in the following ways:
 - bubbles have integer volumes $V_k = k V_1$, and their counts $n_k$ are dumped in the course of the simulation (`SimuVolumesInt`);
@@ -20,8 +24,9 @@ So far, bubbles in the simulation can be handled/dumped in the following ways:
 The module [`main`](cobubbles/main.py) (name may change) is where the different, customized classes are defined.
 
 ### Bubbles
-Bubbles in the simulation are instances of the class `classes.Bubble`.
+Bubbles in the simulation are a list of instances of the class `classes.Bubble`.
 Their attributes (and values) depend on the exact simulation.
+They are modified by the different functions.
 
 ## Parameters management
 ### Simulation parameters
