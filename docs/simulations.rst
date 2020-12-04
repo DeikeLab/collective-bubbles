@@ -1,5 +1,8 @@
+.. _label-classes:
+
 Simulations
 ===========
+
 The following simulations are already built-in.
 
 Simulation A

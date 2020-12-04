@@ -1,5 +1,6 @@
 # Collective Bubbles Statistics
-Framework to simulate surface bubbles, and study their statistics as a function of a reduced number of parameters (production rate, mean lifetime, merging efficiency, etc).
+CoBubbles, for Collective Bubbles Simulations, is a modular Python code for quickly simulating bubbles on a plane (i.e. at the water surface).
+It creates a framework to study surface bubbles statistics, as a function of a reduced number of parameters (production rate, mean lifetime, merging efficiency, etc).
 
 ## Note before you start
 The code is intended to be very modular, to try different parameterizations, models, equations.

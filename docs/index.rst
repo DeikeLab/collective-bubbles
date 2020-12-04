@@ -34,6 +34,12 @@ Provided that ``Simu`` is defined properly:
    s = Simu(**params)
    s.params # or s.params_df for a view as a pd.Series
 
+Then run the simulation for 100 steps and display a *time* series of bubbles number :math:`n` and mean size :math:`\langle d/d_1 \rangle` (figure output may be different for one run to the next):
+
+.. code-block:: python
+
+    s.run(100)
+    s.plot_time_series()
 
 References
 ----------
