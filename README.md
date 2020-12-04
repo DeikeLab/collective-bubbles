@@ -52,7 +52,7 @@ params = dict(lifetime=10)
 s = Simu(**params)
 s.params #or s.params_df for a view as a pd.Series
 ```
-Then run the simulation for 100 steps and display a ``time'' series of bubbles number and mean size (figure output may be different):
+Then run the simulation for 100 steps and display a ``time'' series of bubbles number and mean size (figure output may be different for one run to the next):
 ```
 s.run(100)
 s.plot_time_series()
@@ -62,4 +62,6 @@ s.plot_time_series()
 [An example in a notebook.](examples/minimal_example-SimuB.ipynb)
 
 ## Installation
-As a regular Python package: clone package locally or download a zipped released version then `pip install .`.  Or `pip install -e .` if one plans to edit their own classes.
+As a regular Python package:
+-  `pip install git+https://github.com/DeikeLab/collective-bubbles.git@v0.2.1`, with the last available release.
+- or clone package locally/download a zipped released version then `pip install .` (option `-e `/`--editable` if you plan to edit your own classes).
