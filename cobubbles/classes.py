@@ -14,10 +14,12 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.stattools import acf
 import scipy.optimize as opt
 from itertools import chain
-from os.path import abspath, isfile
+from os.path import abspath, isfile, splitext
 from datetime import datetime
+import warnings
 
 from . import __version__
+from .io import read_csv
 
 def _format_slice(slice_iter):
     """
@@ -424,21 +426,15 @@ class SimuVolumesInt(BaseSimu):
         self.mode = 'run'
         if 'filename' in kwargs:
             fname = abspath(kwargs['filename'])
-            if isfile(fname):
-                self.params = pd.read_hdf(fname, key='params', mode='r')
-                df = pd.read_hdf(fname, key='count', mode='r')
-                if df.dtype == 'uint8':
-                    # TODO: maybe harmonize everything in UINT64?
-                    df = df.astype('int64')
-
+            self.params, df = self._read_file(fname)
 
             if mode is None or mode == 'analysis':
                 self.bubbles = df
                 self._bubbles_df = df
                 self.mode = 'analysis'
+            elif mode == 'run':
                 # THIS LINE TAKES TOO LONG (and useless unless wanna keep running
                 # simulation, but there are other ways to do)
-            elif mode == 'run':
                 self.bubbles = [df.loc[k] \
                         for k in df.index.get_level_values(0).unique()]
                 self.mode = 'run'
@@ -446,6 +442,23 @@ class SimuVolumesInt(BaseSimu):
                     for k, r in df.loc[df.index[-1][0]].iteritems()]))
             
         return None
+
+    @staticmethod
+    def _read_file(fname):
+        if isfile(fname):
+            ext = splitext(fname)[-1]
+            if ext == '.h5':
+                w = 'HDF support is being dropped in favor of CSV.'
+                warnings.warn(w, DeprecationWarning)
+                params = pd.read_hdf(fname, key='params', mode='r')
+                df = pd.read_hdf(fname, key='count', mode='r')
+                if df.dtype != 'int64':
+                    # TODO: maybe harmonize everything in UINT64? No need.
+                    df = df.astype('int64')
+            elif ext == '.csv':
+                params, df = read_csv(fname, index_col=(0, 1))
+                df = df['count']
+        return params, df
 
     def _format_bubbles(self, bubbles):
         """
@@ -526,18 +539,60 @@ class SimuVolumesInt(BaseSimu):
         See also
         --------
         __init__ : `filename` keyword argument to retrieve stored data.
+
+        Deprecation
+        -----------
+        DeprecationWarning for v > 0.2.1.
         """
+        w = 'HDF support is being dropped in favor of CSV.'
+        # HDF for params has a weird behavior, due to mixed data type
+        warnings.warn(w, DeprecationWarning)
         df = self.bubbles_df.copy()
-        if df.max() <= 255:
-            df = df.astype('uint8')
+        nmax = df.max()
+        if nmax < 2**8:
+            dtype = 'uint8'
+        elif nmax < 2**16:
+            dtype = 'uint16'
+        elif nmax < 2**32:
+            dtype = 'uint32'
+        else:
+            dtype = df.dtype
         if 'mode' not in kwargs.keys():
             kwargs['mode'] = 'w'
         if 'key' not in kwargs.keys():
             kwargs['key'] = 'count'
-        df.to_hdf(fname, **kwargs)
+        df.astype(dtype).to_hdf(fname, **kwargs)
         self.params_df.to_hdf(fname, key='params', mode='a')
         return
         
+    def to_csv(self, fname, header_tag='params', **kwargs):
+        """
+        Save bubble volume distribution/count (per iteration) as CSV file.
+        
+        Notes
+        -----
+        * Existing file is overridden.
+        * A header containing the simulation parameters is written between
+            html-like tags `<header_tag>` and `</header_tag>`, one per line
+            as key-value pairs, separated by `sep`.
+        
+        See also
+        --------
+        __init__ : `filename` keyword argument to retrieve stored data.
+        """
+        if 'sep' in kwargs:
+            sep = kwargs['sep']
+        else:
+            sep = ','
+        # format and save header
+        lines = ['{}{}{}\n'.format(k, sep, v) for k, v in self.params.items()]
+        with open(fname, 'w') as f:
+            f.write('<{}>\n'.format(header_tag))
+            f.writelines(lines)
+            f.write('</{}>\n'.format(header_tag))
+        self.bubbles_df.to_csv(fname, mode='a', **kwargs)
+        return None
+
     def plot_time_series(self, cols=['count', 'avg_d^1']):
         """
         Quick plot of `self.bubbles_by_iter`.
@@ -729,4 +784,6 @@ class SimuVolumesInt(BaseSimu):
             '3_volume': np.average(d**3, weights=n),
             }, name='moments')
         return moments
+
+
 
