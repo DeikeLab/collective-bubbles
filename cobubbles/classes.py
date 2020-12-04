@@ -165,7 +165,7 @@ class BaseSimu:
         self.params = _params_default.copy()
         self.params['code_version'] = __version__
         self.params['class_name'] = '.'.join((self.__module__, self.__name__))
-        self.params['timestamp'] = datetime.now()
+        self.params['timestamp'] = datetime.now().isoformat()
         # class default values
         if hasattr(self, '_params_default'):
             for k, v in self._params_default.items():
@@ -447,18 +447,10 @@ class SimuVolumesInt(BaseSimu):
     def _read_file(fname):
         if isfile(fname):
             ext = splitext(fname)[-1]
+            # read and post-format as desired by data fmt
             if ext == '.h5':
-                with pd.HDFStore(fname, mode='r') as store:
-                    df = store['count']
-                    try:
-                        params = store.get_storer('count').attrs['params']
-                    except KeyError:
-                        params = store['params']
-                        msg = 'Params saved before v0.2., '\
-                                +'may need some harmonizing.'
-                        warnings.warn(msg, UserWarning)
+                params, df = read_hdf(fname, mode='r')
                 if df.dtype != 'int64':
-                    # TODO: maybe harmonize everything in UINT64? No need.
                     df = df.astype('int64')
             elif ext == '.csv':
                 params, df = read_csv(fname, index_col=(0, 1))
@@ -567,7 +559,8 @@ class SimuVolumesInt(BaseSimu):
             key = 'count'
             # store data, then parameters as attribute
             store.put(key, df.astype(dtype))
-            store.get_storer(key).attrs.params = self.params
+            for k, v in self.params.items():
+                store.get_storer(key).attrs['params_'+k] = v
         return
         
     def to_csv(self, fname, header_tag='params', **kwargs):
