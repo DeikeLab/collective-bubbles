@@ -27,7 +27,7 @@ Bubble
 
 Bubbles in the simulation are a list of instances of the class ``classes.Bubble``.
 Their attributes (and values) depend on the exact simulation.
-The list is modified modified by the different functions listed `above <label-modules>`, given as argument **and** return.
+The list is modified modified by the different functions listed :ref:`above <label-modules>`, given as argument **and** return.
 
 Simus: parents
 ^^^^^^^^^^^^^^
