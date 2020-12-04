@@ -16,9 +16,9 @@ Contents
    :maxdepth: 1
 
    install
-   release_notes
    code_organization
    simulations
+   release_notes
 
 
 Example
