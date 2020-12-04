@@ -448,10 +448,15 @@ class SimuVolumesInt(BaseSimu):
         if isfile(fname):
             ext = splitext(fname)[-1]
             if ext == '.h5':
-                w = 'HDF support is being dropped in favor of CSV.'
-                warnings.warn(w, DeprecationWarning)
-                params = pd.read_hdf(fname, key='params', mode='r')
-                df = pd.read_hdf(fname, key='count', mode='r')
+                with pd.HDFStore(fname, mode='r') as store:
+                    df = store['count']
+                    try:
+                        params = store.get_storer('count').attrs['params']
+                    except KeyError:
+                        params = store['params']
+                        msg = 'Params saved before v0.2., '\
+                                +'may need some harmonizing.'
+                        warnings.warn(msg, UserWarning)
                 if df.dtype != 'int64':
                     # TODO: maybe harmonize everything in UINT64? No need.
                     df = df.astype('int64')
@@ -523,32 +528,33 @@ class SimuVolumesInt(BaseSimu):
             l = len(self.bubbles.index.get_level_values('iter').unique())
         return l
 
-    def to_hdf(self, fname, **kwargs):
+    def to_hdf(self, fname, mode='w'):
         """
         Save bubble volume distribution/count (per iteration) as HDF5 file.
         
+        Parameters
+        ----------
+        fname : str
+            Filename.
+
+        mode : str, optional
+            Python open file mode.
+
         Notes
         -----
-        - By default, file is overridden, unless stated in `kwargs`.
-        - HDF5 file contains 2 keys: 
-          - `count` for histograms,
-          - `params` for simulation parameters
-        - When bubbles count is less than or equal to 255 (per iter), data is
-        saved as UINT8.
+        * HDF5 file contain 1 key: `count`, i.e. 1 table where Series of bubbles
+        counts are stored (hierarchical index iteration/volume (as int)).
+        * Parameters `params` are saved as an attribute of the corresping table.
+        * When bubbles count per iteration is less than 2**8 (resp. 16, 32),
+        data is saved as UINT8 (resp. 16, 32).
 
         See also
         --------
-        __init__ : `filename` keyword argument to retrieve stored data.
-
-        Deprecation
-        -----------
-        DeprecationWarning for v > 0.2.1.
+        _read_file : `filename` keyword argument to retrieve stored data.
         """
-        w = 'HDF support is being dropped in favor of CSV.'
-        # HDF for params has a weird behavior, due to mixed data type
-        warnings.warn(w, DeprecationWarning)
         df = self.bubbles_df.copy()
         nmax = df.max()
+        # choose dtype to minimize storage
         if nmax < 2**8:
             dtype = 'uint8'
         elif nmax < 2**16:
@@ -557,12 +563,11 @@ class SimuVolumesInt(BaseSimu):
             dtype = 'uint32'
         else:
             dtype = df.dtype
-        if 'mode' not in kwargs.keys():
-            kwargs['mode'] = 'w'
-        if 'key' not in kwargs.keys():
-            kwargs['key'] = 'count'
-        df.astype(dtype).to_hdf(fname, **kwargs)
-        self.params_df.to_hdf(fname, key='params', mode='a')
+        with pd.HDFStore(fname, mode=mode) as store:
+            key = 'count'
+            # store data, then parameters as attribute
+            store.put(key, df.astype(dtype))
+            store.get_storer(key).attrs.params = self.params
         return
         
     def to_csv(self, fname, header_tag='params', **kwargs):
