@@ -1,11 +1,11 @@
-#!/usr/local/bin/python3
-#-*- coding: utf-8 -*-
-"""
+"""Module methods_merge.py
+
+Description: methods for merging bubbles
+
 Created on Wed Jun 17 16:56:40 2020
 
 @author: baptiste
 
-Description:
 """
 
 import numpy as np

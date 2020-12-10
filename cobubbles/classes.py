@@ -1,13 +1,12 @@
-#!/usr/local/bin/python3
-#-*- coding: utf-8 -*-
-"""
+"""Module classes.py
+
+Simulation model and base classes definition.
+
 Created on Wed Jun 17 15:56:33 2020
 
 @author: baptiste
 
-Description: classes and simulation model definition
 """
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -54,8 +53,7 @@ def _format_slice(slice_iter):
 
 
 class Bubble:
-    """
-    A bubble in the simulation.
+    """A bubble in the simulation.
 
     Attributes 
     ----------
@@ -65,99 +63,88 @@ class Bubble:
     Methods
     -------
     to_dict : return attributes as a dictionary.
-
     to_series : return attributes as a pandas.Series.
     """
+
     def __init__(self, **kwargs):
         """
-        kwargs : keyword arguments, passed on as class attributes.
+        kwargs : dict
+            Class attributes, passed on as keyword arguments.
         """
         for k, v in kwargs.items():
             self.__setattr__(k, v)
         return
 
     def to_dict(self):
-        """
-        Return bubble info as a dictionary.
-        """
+        """Return bubble info as a dictionary."""
         return self.__dict__
 
     def to_series(self):
-        """
-        Return bubble info as a pd.Series.
-        """
+        """Return bubble info as a `pandas.Series`."""
         return pd.Series(self.__dict__)
 
 
 class BaseSimu:
-    """
-    Meta-class for collective surface bubbles simulations.
+    """Meta-class for collective surface bubbles simulations.
 
     Children must define the following methods and attributes.
+
     Attributes
     ----------
-    `_bubbles` : list
+    _bubbles : list
         List of **current** bubbles, carried on all along the simulation. Can 
         contain as little information as the bubbles radii or volumes, or their
         location, etc. The dimensionality must match that of the methods 
         modifying it.
-
-    `bubbles` : list
+    bubbles : list
         List of bubbles dumped after every iteration. See also `_format_bubbles`.
-
-    `params` : dict
+    params : dict
         Simulation parameters. See also `params_df`.
-
-    `_bubble_init` : dict
+    _bubble_init : dict
         Bubble initialization properties.
  
     Numerical Methods
     -----------------
-    `step_advance(bubbles)`
+    step_advance(bubbles)
         Step advance, defined as the sequence of the 4 methods (create, pop,
         move, merge), in this order. When bubbles have a lifetime, it is 
         incremented by 1 after those.
-
-    `run(n_steps)`
+    run(n_steps)
         Advance simulation by `n_steps`.
 
+    Scheme Methods
+    --------------
     The following methods are sub-class dependent, and have to be (re)-defined
     and overridden.
-    `_create_bubbles(bubbles)`
+
+    _create_bubbles(bubbles)
         Create/introduce bubbles.
-
-    `_pop_bubbles(bubbles)` 
+    _pop_bubbles(bubbles)
         Pop/burst bubbles.
-
-    `_move_bubbles(bubbles)` 
+    _move_bubbles(bubbles) 
         Move/displace bubbles.
-
-    `_merge_bubbles(bubbles)` 
+    _merge_bubbles(bubbles)
         Merge/coalesce bubbles.
-
-    `_format_bubbles(bubbles)` 
+    _format_bubbles(bubbles)
         Format bubbles, before appending to `bubbles`.
 
-    Other Methods
+    I/O Methods
     -------------
-    `plot_bubbles_number()`
+    plot_bubbles_number()
         Plot bubbles number vs iteration.
-
-    `_count_bubbles(bubbles)`
+    count_bubbles(bubbles)
         Count bubbles (may require more elaborate procedure than `len(bubbles)`)
-
-    `to_hdf(filename)`
+    to_hdf(filename)
         Export bubbles as HDF5 file (using pandas).
     """
+
     def __init__(self, **kw_params):
         """
         Parameters
         ----------
-        data_id : None or tuple, optional
-            Data identifier, to proceed to
-
-        **kw_params : keyword arguments
-            Additional parameters.
+        **kw_params : dict
+            Additional **simulation** parameters (may be a list of `Bubble` 
+            instances).
         """
         # initialize parameters
         from .main import _params_default, _bubble_init
@@ -192,15 +179,14 @@ class BaseSimu:
 
     @property
     def params_df(self):
-        """Simulation parameters as a pandas.Series"""
+        """Simulation parameters as a `pandas.Series`."""
         return pd.Series(self.params)
 
     def __len__(self):
         return len(self.bubbles)
 
     def step_advance(self, bubbles):
-        """
-        Advance simulation by 1 iteration.
+        """Advance simulation by 1 iteration.
 
         Parameters
         ----------
@@ -215,6 +201,7 @@ class BaseSimu:
         Notes
         -----
         Apply methods in the following order:
+
         1. `_new_bubbles(bubbles)`
         2. `_pop_bubbles(bubbles)`
         3. `_move_bubbles(bubbles)`
@@ -233,9 +220,7 @@ class BaseSimu:
         return bubbles
 
     def run(self, steps=None):
-        """
-        Run simulation for given number of steps.
-        """
+        """Run simulation for given number of steps."""
         bubbles = self._bubbles
         if steps is None:
             steps = self.params['steps']
@@ -246,7 +231,7 @@ class BaseSimu:
 
     def plot_bubbles_number(self, ax=None):
         """
-        Plot ``time'' series for length of bubbles list at each iteration.
+        Plot *time* series for length of bubbles list at each iteration.
 
         Parameters
         ----------

@@ -28,6 +28,8 @@ author = 'Baptiste Néel'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+        'sphinx.ext.napoleon',
+        'sphinx.ext.autodoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,4 +54,4 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 pygments_style = 'sphinx'
 
-html_favicon = 'fav.ico'
+html_favicon = '_static/fav.ico'

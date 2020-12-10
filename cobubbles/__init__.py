@@ -1,9 +1,11 @@
-#!/usr/local/bin/python3
-#-*- coding: utf-8 -*-
-#
-#Author: Baptiste Neel
-#Creation date: 13-04-2020
-#Description:
+"""CoBubbles
+
+CoBubbles, for Collective Bubbles Simulation, is a modular Python code for
+quickly simulating bubbles on a plane (i.e. at the water surface).
+
+@author: B. Néel.
+
+"""
 
 from ._version import get_versions
 __version__ = get_versions()['version']

@@ -1,10 +1,12 @@
-#!/usr/local/bin/python3
-#-*- coding: utf-8 -*-
-#
-#File name: io.py
-#Author: Baptiste Neel
-#Creation date: 28-04-2020
-#Description:
+"""Module io.py
+
+Description: input/output utils.
+
+Created on Wed Jun 17 15:56:33 2020
+
+@author: baptiste
+
+"""
 
 import pandas as pd
 from datetime import datetime

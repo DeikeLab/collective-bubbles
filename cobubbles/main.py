@@ -1,11 +1,11 @@
-#!/usr/local/bin/python3
-#-*- coding: utf-8 -*-
-"""
+"""Module main.py
+
+Description: Definition of different simulations.
+
 Created on Wed Apr 8 15:56:33 2020
 
 @author: baptiste
 
-Description: Definition of different simulations.
 """
 
 import numpy as np

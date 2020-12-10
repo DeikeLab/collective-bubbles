@@ -1,13 +1,10 @@
-#!/usr/local/bin/python3
-#-*- coding: utf-8 -*-
-#
-#File name: methods_move.py
-#Author: Baptiste Neel
-#Creation date: 17-06-2020
-#Description:
+"""Module methods_move.py
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import experiment as expe
+Description: methods for moving bubbles
+
+Created on Wed Jun 17 16:56:40 2020
+
+@author: baptiste
+
+"""
 
