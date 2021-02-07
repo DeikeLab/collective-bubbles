@@ -18,7 +18,7 @@ from datetime import datetime
 import warnings
 
 from . import __version__
-from .io import read_csv
+from .io import read_csv, read_hdf
 
 def _format_slice(slice_iter):
     """
@@ -736,7 +736,7 @@ class SimuVolumesInt(BaseSimu):
         return counts
 
     def get_moments(self, slice_iter=None):
-        """
+        r"""
         Get moments of the bubbles distribution for the given iterations.
 
         Parameters
@@ -755,6 +755,14 @@ class SimuVolumesInt(BaseSimu):
         - 2: to get surface area `coverage` by bubbles, normalize by number of
             iterations, surface area and `pi/4*self.d_unit**2`.
         - 3: volumes are in natural units (integers).
+
+        .. math::
+            
+            \langle d^p \rangle = \frac{\sum n_k d_k^p}{\sum n_k}
+
+        See also
+        --------
+        self.density_coverage : bubbles surface density and coverage.
         """
         # 2 methods: either by iter first, then average, or average directly
         h = self.get_histogram(slice_iter=slice_iter).reset_index()
@@ -768,5 +776,31 @@ class SimuVolumesInt(BaseSimu):
             }, name='moments')
         return moments
 
+    def get_density_coverage(self, slice_iter=None):
+        r"""
+        Surface density `\rho` and coverage `\phi`.
 
+        Parameters
+        ----------
+        slice_iter : None, int, tuple of 3 int or slice, optional
+            See `_format_slice` docstring in this module.
+
+        Notes
+        -----
+        .. math::
+
+            \rho = \frac{\sum n_k}{A}
+            \phi = \frac{\pi}{4} \frac{\sum n_k d_k^2}{A} 
+                 = \frac{\pi}{4} \rho \langle d^2 \rangle
+
+        See also
+        --------
+        self.get_moments
+        """
+        s = _format_slice(slice_iter)
+        m = self.get_moments(slice_iter=s)
+        N = len(self.bubbles_by_iter.loc[s])
+        rho = m['0_count']/self.params['width']**2/N
+        phi = np.pi/4*m['2_coverage']*rho
+        return rho, phi
 

@@ -160,6 +160,38 @@ class SimuB(SimuVolumesInt):
                     proba=p['merging_probability'])
         return bubbles
 
+class SimuB2(SimuB):
+    """
+    Creation: `rate_prod` bubbles per iteration.
+
+    Bursting: remove old bubbles, according to exponential distribution of 
+        lifetimes.
+    """
+    __name__ = 'SimuB2'
+    _params_default = {
+            'mean_lifetime': 1,
+            'merging_probability': 1,
+            }
+
+    _bubble_init = {
+            'lifetime': 0,
+            }
+
+    def _pop_bubbles(self, bubbles):
+        """
+        Pop `n` bubbles, randomly (uniform distribution) chosen in the bubbles
+        list. `n` is normally distributed.
+        Notes
+        -----
+        Currently implemented: only uniform popping for every sizes.
+        """
+        p = stats.expon.cdf([b.lifetime for b in bubbles],\
+                loc=0, scale=self.params['mean_lifetime'])
+        pop, = np.where(np.random.binomial(1, p) == 1)
+        for k in sorted(pop, reverse=True):
+            bubbles.pop(k)
+        return bubbles
+
 
 class SimuC(SimuVolumesInt):
     """
