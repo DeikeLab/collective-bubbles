@@ -14,7 +14,7 @@ from scipy.spatial import distance
 
 from .classes import Bubble
 
-def merge_bubbles_pair(bubble1, bubble2):
+def merge_bubbles_pair(bubble1, bubble2, **bubble_kw):
     """
     Pair coalescence definition.
 
@@ -22,6 +22,9 @@ def merge_bubbles_pair(bubble1, bubble2):
     ----------
     bubble1, bubble2: Bubble instances
         Bubbles to be merged.
+
+    **bubble_kw : keyword arguments
+        Values passed to new bubble initialization.
 
     Returns
     -------
@@ -31,7 +34,7 @@ def merge_bubbles_pair(bubble1, bubble2):
     b1, b2 = bubble1, bubble2
     # get intersection of bubbles attributes
     attrs = b1.__dict__.keys() & b1.__dict__.keys()
-    kw = {}
+    kw = bubble_kw
     # define merging rules, here volume adds up
     if 'volume' in attrs:
         # multiple rules for the same result
@@ -44,31 +47,22 @@ def merge_bubbles_pair(bubble1, bubble2):
         # bubble location
         xy1, xy2 = np.array(b1.xy), np.array(b2.xy)
         kw['xy'] = (V1*xy1 + V2*xy2)/(V1 + V2)
-    # new params
-    kw['lifetime'] = 0
     # create new bubble
     bubble = Bubble(**kw)
     return bubble
 
 
-def merge_bubbles_closest(bubbles, max_dist, 
-        show=False, return_locs=False, proba=1):
+def merge_bubbles_closest(bubbles, max_dist, proba=1, show=False, **bubble_kw):
     """
     Stencil for merging bubbles, closest first, not recursively.
 
     Parameters
     ----------
-    volumes : list
-        List of bubbles volumes, length N.
-
-    locs : np.array, shape (N, 2)
-        Bubbles location, as a list-like of `x, y` coordinates.
+    bubbles : list
+        List of bubbles, length N. Modified in place, and returned.
 
     max_dist : float
         Maximal/threshold distance, below which bubbles merge.
-
-    unit_volume : float, optional
-        Unit volume, to compute diameters as `(volumes/unit_volume)**(1/3)`.
 
     proba : float, optional
         Individual merging probability: 0 for no coalescence, 1 for systematic
@@ -77,16 +71,23 @@ def merge_bubbles_closest(bubbles, max_dist,
     show : bool or plt.Axes, optional
         Visualize merging step in plot (default False).
 
+    **bubble_kw : keyword arguments
+        Merged bubbles initialization, passed to `merge_bubbles_pair`.
+
     Returns
     -------
-    sizes : list
-        Updated list of bubbles size, length M.
+    bubbles : list
+        Updated list of bubbles, length M.
 
     Notes
     -----
-    - Modify and return `sizes` in place.
+    - Modify and return bubbles in place.
     - The algorithm is not recursive: if after merging 2 bubbles could be
     merging again, they do not.
+
+    See also
+    --------
+    merge_bubbles_pair
     """
     bubbles_old = bubbles.copy()
     # Get bubbles diameter and location
@@ -115,7 +116,7 @@ def merge_bubbles_closest(bubbles, max_dist,
         # get bubbles vol, fill in the `merged` list, compute new bubble vol
         b1 = bubbles.pop(max((i-i_sh, j-j_sh)))
         b2 = bubbles.pop(min((i-i_sh, j-j_sh)))
-        b = merge_bubbles_pair(b1, b2)
+        b = merge_bubbles_pair(b1, b2, **bubble_kw)
         bubbles.append(b)
         merged.extend([i, j])
     # visualize results
@@ -137,8 +138,6 @@ def merge_bubbles_closest(bubbles, max_dist,
         ax.set_ylim(m[0, 1], M[1, 1])
         ax.set_aspect('equal')
     out = bubbles
-    if return_locs == True:
-        out = volumes, locs_new
     return out
 
 def merge_bubbles_closest_recursive(sizes, distances):

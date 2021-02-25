@@ -107,7 +107,7 @@ class BaseSimu:
     -----------------
     step_advance(bubbles)
         Step advance, defined as the sequence of the 4 methods (create, pop,
-        move, merge), in this order. When bubbles have a lifetime, it is 
+        move, merge), in this order. When bubbles have an age, it is 
         incremented by 1 after those.
     run(n_steps)
         Advance simulation by `n_steps`.
@@ -153,6 +153,10 @@ class BaseSimu:
         self.params['code_version'] = __version__
         self.params['class_name'] = '.'.join((self.__module__, self.__name__))
         self.params['timestamp'] = datetime.now().isoformat()
+        # warnings
+        if hasattr(self, '__warnings__'):
+            for w, m in self.__warnings__:
+                warnings.warn(m, w)
         # class default values
         if hasattr(self, '_params_default'):
             for k, v in self._params_default.items():
@@ -214,9 +218,9 @@ class BaseSimu:
         #TODO: bubbles move a little around their location (needs dynamics)
         bubbles = self._move_bubbles(bubbles)
         bubbles = self._merge_bubbles(bubbles)
-        if 'lifetime' in self._bubble_init:
+        if 'age' in self._bubble_init:
             for b in bubbles:
-                b.lifetime += 1
+                b.age += 1
         return bubbles
 
     def run(self, steps=None):
@@ -495,7 +499,8 @@ class SimuVolumesInt(BaseSimu):
                     for b in self.bubbles)),
                     names=['iter', 'volume'])
         # store DF in a private variable
-        self._bubbles_df = df
+        #TODO: incompatible with n0 = 0 bubbles, or with an iter with 0 bub
+        #self._bubbles_df = df
         return df
 
     def __len__(self):
