@@ -273,6 +273,15 @@ class SimuD(SimuVolumesInt):
             }
     _bubble_init_ = {'age' : 0}
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        n0 = self.params['n_bubbles']
+        if n0 > 0:
+            tau = self.params['dist_lifetime'].rvs(size=n0)
+            for b, t in zip(self._bubbles, tau):
+                b.lifetime = t
+        return
+
     def _create_bubbles(self, bubbles):
         q_prod = [self.params['rate_prod_'+s] for s in ['avg', 'std']]
         n_new = abs(int(round(stats.norm.rvs(*q_prod))))
