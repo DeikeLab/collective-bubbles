@@ -276,7 +276,7 @@ class SimuD(SimuVolumesInt):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         n0 = self.params['n_bubbles']
-        if n0 > 0:
+        if 'filename' not in kwargs and n0 > 0:
             tau = self.params['dist_lifetime'].rvs(size=n0)
             for b, t in zip(self._bubbles, tau):
                 b.lifetime = t

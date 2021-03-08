@@ -378,6 +378,27 @@ class BaseSimu:
         """
         return bubbles.copy()
 
+    @property
+    def mean_lifetime(self):
+        """Bubble mean lifetime `tau`"""
+        p = self.params
+        tau = None
+        if 'mean_lifetime' in p:
+            tau = p['mean_lifetime']
+        elif 'dist_lifetime' in p:
+            tau = p['dist_lifetime'].mean()
+        return tau
+
+    @property
+    def production_rate(self):
+        r"""Adimensioned production rate :math:`\tilde p`"""
+        p = self.params
+        prod = None
+        tau = self.mean_lifetime
+        if tau is not None and 'rate_prod_avg' in p and 'width' in p:
+            prod = self.mean_lifetime*p['rate_prod_avg']/p['width']**2
+        return prod
+
 
 class SimuVolumesInt(BaseSimu):
     """
