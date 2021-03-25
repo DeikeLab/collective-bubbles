@@ -3,9 +3,9 @@ Release notes
 
 v0.4
 ----
-* **Deprecate** ``SimuA`` and ``SimuB``, as the Bernoulli trial at every
-  iteration was bursting bubbles at too fast rate.
-* Deprecation warnings added.
+* **Deprecate** ``SimuB``, as the Bernoulli trial at every iteration was 
+  bursting bubbles at too fast rate.
+* Corresponding ``DeprecationWarning`` added.
 * New ``SimuD`` features the following simulation and bubble attributes:
 
   * ``lifetime`` is given to the bubble at creation. After that number of
@@ -14,11 +14,11 @@ v0.4
   * ``dist_lifetime`` the lifetime distribution is given as an input. Prefers
     to be saved in HDF5 file format (``SimuD`` parameter)
 
-* New global attributes and attributes:
+* New global methods and attributes:
 
   * ``mean_lifetime`` mean bubble lifetime (``Simu`` attribute)
   * ``production_rate`` adimensioned production rate 
-    :math:`\tilde_p = p_1\tau/\mathcal{A}` (``Simu`` attribute)
+    :math:`\tilde{p} = p_1\tau/\mathcal{A}` (``Simu`` attribute)
   * ``get_density_coverage`` (``SimuVolumesInt`` method)
 
 v0.3

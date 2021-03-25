@@ -105,7 +105,7 @@ class BaseSimu:
  
     Numerical Methods
     -----------------
-    step_advance(bubbles)
+    _step_advance(bubbles)
         Step advance, defined as the sequence of the 4 methods (create, pop,
         move, merge), in this order. When bubbles have an age, it is 
         incremented by 1 after those.
@@ -189,7 +189,7 @@ class BaseSimu:
     def __len__(self):
         return len(self.bubbles)
 
-    def step_advance(self, bubbles):
+    def _step_advance(self, bubbles):
         """Advance simulation by 1 iteration.
 
         Parameters
@@ -229,7 +229,7 @@ class BaseSimu:
         if steps is None:
             steps = self.params['steps']
         for n in range(steps):
-            bubbles = self.step_advance(bubbles)
+            bubbles = self._step_advance(bubbles)
             self.bubbles.append(self._format_bubbles(bubbles))
         return None
 
@@ -380,7 +380,7 @@ class BaseSimu:
 
     @property
     def mean_lifetime(self):
-        """Bubble mean lifetime `tau`"""
+        r"""Bubble mean lifetime :math:`\tau`."""
         p = self.params
         tau = None
         if 'mean_lifetime' in p:
@@ -391,7 +391,7 @@ class BaseSimu:
 
     @property
     def production_rate(self):
-        r"""Adimensioned production rate :math:`\tilde p`"""
+        r"""Adimensioned production rate :math:`\tilde p = p_1 \tau`"""
         p = self.params
         prod = None
         tau = self.mean_lifetime

@@ -5,7 +5,7 @@ As a regular Python package:
 
 .. code-block:: bash
 
-   pip install git+https://github.com/DeikeLab/collective-bubbles.git@v0.2.1
+   pip install git+https://github.com/DeikeLab/collective-bubbles.git@v0.4.1
    
 specifying the last available release.
 

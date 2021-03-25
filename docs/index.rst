@@ -5,9 +5,9 @@
 
 CoBubbles
 =========
-CoBubbles, for Collective Bubbles Simulations, is a modular Python code for
-quickly simulating bubbles on a plane (i.e. at the water surface).
-
+CoBubbles stands for Collective Bubbles Simulations.
+It is a modular Python code for simulating bubbles on a plane (for instance,
+air bubbles at the surface of water).
 
 Contents
 --------
@@ -16,16 +16,16 @@ Contents
    :maxdepth: 1
 
    install
-   code_organization
+   organisation
    simulations
    release_notes
-
 
 Example
 -------
 A minimal working example is demonstrated in `this notebook <https://nbviewer.jupyter.org/github/DeikeLab/collective-bubbles/blob/master/examples/minimal_example-SimuB.ipynb>`_.
 
-Provided that ``Simu`` is defined properly:
+Provided that ``Simu`` is defined properly, the following code instantiates a
+simulation with the given parameters ``params``:
 
 .. code-block:: python
    
@@ -43,8 +43,8 @@ Then run the simulation for 100 steps and display a *time* series of bubbles num
 
 References
 ----------
-Paper submitted.
-
+Néel, B. and Deike, L., *Collective bursting of free surface bubbles, and the
+role of surface contamination*, accepted at J. Fluid Mech.
 
 ..
     Indices and tables
