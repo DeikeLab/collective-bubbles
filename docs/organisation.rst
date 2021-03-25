@@ -95,8 +95,7 @@ Writing one's own simulation is straightforward:
            Pop bubbles with volume larger than `max_volume`.
            """
            V = [b.volume for b in bubbles]
-           V0 = self.params['max_volume']
-           k, = np.where(V > 10)
+           k, = np.where(V > self.params['max_volume'])
            for i in sorted(k, ascending=False):
                bubbles.pop(k)
            return bubbles

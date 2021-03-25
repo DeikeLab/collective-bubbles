@@ -18,7 +18,7 @@ v0.4
 
   * ``mean_lifetime`` mean bubble lifetime (``Simu`` attribute)
   * ``production_rate`` adimensioned production rate 
-    :math:`\tilde{p} = p_1\tau/\mathcal{A}` (``Simu`` attribute)
+    :math:`\tilde{p} = p_1\tau` (``Simu`` attribute)
   * ``get_density_coverage`` (``SimuVolumesInt`` method)
 
 v0.3
