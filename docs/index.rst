@@ -43,8 +43,8 @@ Then run the simulation for 100 steps and display a *time* series of bubbles num
 
 References
 ----------
-Néel, B. and Deike, L., *Collective bursting of free surface bubbles, and the
-role of surface contamination*, accepted at J. Fluid Mech.
+Néel, B., and L. Deike. 2021. “Collective Bursting of Free-Surface Bubbles, and the Role of Surface Contamination.” Journal of Fluid Mechanics 917: A46. https://doi.org/10.1017/jfm.2021.272.
+
 
 ..
     Indices and tables
