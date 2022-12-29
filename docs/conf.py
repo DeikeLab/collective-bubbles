@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'CoBubbles'
-copyright = '2020, Baptiste Néel'
+copyright = '2022, Baptiste Néel'
 author = 'Baptiste Néel'
 
 
